@@ -10,7 +10,7 @@ function isAdmin(request: NextRequest) {
   return cookie === SESSION_VALUE
 }
 
-export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: any) {
   if (!isAdmin(request)) {
     return NextResponse.json({ error: '未授权' }, { status: 401 })
   }
@@ -29,7 +29,7 @@ export async function DELETE(request: NextRequest, context: { params: { id: stri
   }
 }
 
-export async function PATCH(request: NextRequest, context: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, context: any) {
   if (!isAdmin(request)) {
     return NextResponse.json({ error: '未授权' }, { status: 401 })
   }
