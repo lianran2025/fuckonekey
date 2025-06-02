@@ -86,7 +86,7 @@ export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, { 
               `}
               onClick={() => setFilter(f)}
             >
-              {t.filters[f]}
+              {t.filters[f as keyof typeof t.filters]}
             </button>
           ))}
         </div>
@@ -98,7 +98,7 @@ export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, { 
             <div className="flex items-center gap-2 mb-1">
               {/* 状态标签 */}
               <span className={`px-2 py-0.5 text-xs rounded-full font-medium border ${STATUS_COLORS[comment.status] || STATUS_COLORS['pending']}`}>
-                {t.status[comment.status] || '未知'}
+                {t.status[comment.status as keyof typeof t.status] || '未知'}
               </span>
               {comment.category && (
                 <span className="px-2 py-0.5 text-xs rounded-full bg-indigo-50 text-indigo-600 font-medium border border-indigo-100 ml-1">
