@@ -23,10 +23,9 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 async function checkSession() {
-  // 简单用拉取评论接口判断是否有权限
+  // 用一个专门的API校验更清晰，这里直接用 /api/comments 也可以
   const res = await fetch('/api/comments', { credentials: 'include' })
-  if (res.status === 401) return false
-  return true
+  return res.status !== 401
 }
 
 export default function AdminPage() {
@@ -38,8 +37,13 @@ export default function AdminPage() {
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({})
   const [replyLoading, setReplyLoading] = useState<Record<string, boolean>>({})
 
+  // 每次页面加载都校验 session
   useEffect(() => {
-    checkSession().then(setIsAuthenticated)
+    setIsLoading(true)
+    checkSession().then(isAuth => {
+      setIsAuthenticated(isAuth)
+      setIsLoading(false)
+    })
   }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -128,8 +132,10 @@ export default function AdminPage() {
     }
   }
 
+  // 登录后拉取评论
   useEffect(() => {
     if (isAuthenticated) {
+      setIsLoading(true)
       const fetchComments = async () => {
         try {
           const response = await fetch('/api/comments', { credentials: 'include' })
@@ -147,6 +153,10 @@ export default function AdminPage() {
       fetchComments()
     }
   }, [isAuthenticated])
+
+  if (isLoading) {
+    return <div className="text-center p-8">加载中...</div>
+  }
 
   if (!isAuthenticated) {
     return (
@@ -176,10 +186,6 @@ export default function AdminPage() {
         </form>
       </div>
     )
-  }
-
-  if (isLoading) {
-    return <div className="text-center p-8">加载中...</div>
   }
 
   return (
