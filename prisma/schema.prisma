@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["onekey_feedback"]
+}
+
+model OneKeyFeedback {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  status    String   @default("pending") // pending, approved, rejected
+  category  String?  // 评论分类：建议、bug、其他等
+  ip        String?  // 记录IP地址，用于防止垃圾评论
+  isDeleted Boolean  @default(false)
+  reply     String?  // 管理员回复
+
+  @@map("onekey_feedback")
+  @@schema("onekey_feedback")
+}
+
+model OneKeyAdmin {
+  id       String @id @default(cuid())
+  username String @unique
+  password String
+  role     String @default("admin") // admin, super_admin
+
+  @@map("onekey_admin")
+  @@schema("onekey_feedback")
+}
