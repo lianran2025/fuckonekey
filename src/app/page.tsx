@@ -42,7 +42,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center py-10 px-2">
-      <div className="w-full max-w-3xl mx-auto relative">
+      <div className="w-full max-w-6xl mx-auto relative">
         <div className="w-full flex justify-end md:absolute md:right-0 md:top-0 md:mt-2 md:mr-2 z-10 mb-4 md:mb-0">
           <div className="inline-flex shadow rounded-full overflow-hidden border border-gray-200 bg-white">
             <button

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, forwardRef, useImperativeHandle } from 'react'
+import Masonry from 'react-masonry-css'
 
 interface Comment {
   id: string
@@ -9,6 +10,8 @@ interface Comment {
   status: string
   category?: string
   reply?: string
+  avatar?: string
+  nickname?: string
 }
 
 interface CommentListProps {
@@ -40,6 +43,47 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 const FILTERS = ['all', 'approved', 'rejected', 'pending'] as const
+
+// Masonry断点
+const breakpointColumnsObj = {
+  default: 3,   // 超大屏幕3列
+  1280: 2,     // 1280px以下2列
+  900: 1,      // 900px以下1列
+}
+
+function formatTime(dateStr: string, lang: 'zh' | 'en') {
+  const date = new Date(dateStr)
+  return date.toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+}
+
+function CommentCard({ comment, lang, t }: { comment: Comment; lang: 'zh' | 'en'; t: any }) {
+  return (
+    <div className="bg-white rounded-2xl shadow-lg px-7 py-6 flex flex-col gap-3 hover:shadow-2xl transition-all min-h-[180px]">
+      <div className="flex items-center gap-3 mb-2">
+        <img src={comment.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover bg-gray-100 border" />
+        <div className="flex flex-col">
+          <span className="font-semibold text-gray-900 text-base">{comment.nickname || 'Anonymous'}</span>
+          <span className="text-xs text-gray-400">{formatTime(comment.createdAt, lang)}</span>
+        </div>
+        <span className={`ml-auto px-2 py-0.5 text-xs rounded-full font-medium border ${STATUS_COLORS[comment.status] || STATUS_COLORS['pending']}`}>{t.status[comment.status as keyof typeof t.status] || '未知'}</span>
+      </div>
+      <p className="text-gray-800 text-base leading-relaxed break-words whitespace-pre-line">{comment.content}</p>
+      {comment.reply && (
+        <div className="mt-3 rounded-lg bg-indigo-50 border-l-4 border-indigo-400 px-4 py-2">
+          <div className="text-xs text-indigo-500 font-semibold mb-1">{t.reply}</div>
+          <div className="text-indigo-900 text-sm whitespace-pre-line">{comment.reply}</div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, CommentListProps>(
   ({ lang = 'zh', defaultFilter = 'pending' }, ref) => {
@@ -82,9 +126,9 @@ export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, Co
     }
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <>
         {/* 筛选控件 */}
-        <div className="col-span-full flex gap-2 mb-2">
+        <div className="flex gap-2 mb-2">
           {FILTERS.map((f) => (
             <button
               key={f}
@@ -99,42 +143,21 @@ export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, Co
             </button>
           ))}
         </div>
-        {filteredComments.map((comment) => (
-          <div
-            key={comment.id}
-            className="bg-white rounded-2xl shadow-lg px-7 py-6 flex flex-col gap-3 hover:shadow-2xl transition-all min-h-[180px]"
-          >
-            <div className="flex items-center gap-2 mb-1">
-              {/* 状态标签 */}
-              <span className={`px-2 py-0.5 text-xs rounded-full font-medium border ${STATUS_COLORS[comment.status] || STATUS_COLORS['pending']}`}>
-                {t.status[comment.status as keyof typeof t.status] || '未知'}
-              </span>
-              {comment.category && (
-                <span className="px-2 py-0.5 text-xs rounded-full bg-indigo-50 text-indigo-600 font-medium border border-indigo-100 ml-1">
-                  {comment.category}
-                </span>
-              )}
-              <span className="text-xs text-gray-400 ml-auto">
-                {lang === 'en' ? t.time(comment.createdAt) : new Date(comment.createdAt).toLocaleString()}
-              </span>
-            </div>
-            <p className="text-gray-800 text-base leading-relaxed break-words whitespace-pre-line">
-              {comment.content}
-            </p>
-            {comment.reply && (
-              <div className="mt-3 rounded-lg bg-indigo-50 border-l-4 border-indigo-400 px-4 py-2">
-                <div className="text-xs text-indigo-500 font-semibold mb-1">{t.reply}</div>
-                <div className="text-indigo-900 text-sm whitespace-pre-line">{comment.reply}</div>
-              </div>
-            )}
-          </div>
-        ))}
+        <Masonry
+          breakpointCols={breakpointColumnsObj}
+          className="flex w-auto gap-8"
+          columnClassName="masonry-column flex flex-col gap-8"
+        >
+          {filteredComments.map((comment) => (
+            <CommentCard key={comment.id} comment={comment} lang={lang} t={t} />
+          ))}
+        </Masonry>
         {filteredComments.length === 0 && (
-          <div className="col-span-full text-center text-gray-400 py-8">
+          <div className="text-center text-gray-400 py-8">
             {t.noComment}
           </div>
         )}
-      </div>
+      </>
     )
   }
 ) 
