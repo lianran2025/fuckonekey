@@ -11,6 +11,11 @@ interface Comment {
   reply?: string
 }
 
+interface CommentListProps {
+  lang?: 'zh' | 'en'
+  defaultFilter?: 'all' | 'approved' | 'rejected' | 'pending'
+}
+
 const TEXT = {
   zh: {
     status: { approved: '已采纳', rejected: '已拒绝', pending: '待处理' },
@@ -34,13 +39,13 @@ const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-gray-100 text-gray-500 border-gray-200',
 }
 
-const FILTERS = ['all', 'approved', 'rejected', 'pending']
+const FILTERS = ['all', 'approved', 'rejected', 'pending'] as const
 
-export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, { lang?: 'zh' | 'en' }>(
-  ({ lang = 'zh' }, ref) => {
+export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, CommentListProps>(
+  ({ lang = 'zh', defaultFilter = 'pending' }, ref) => {
     const [comments, setComments] = useState<Comment[]>([])
     const [isLoading, setIsLoading] = useState(true)
-    const [filter, setFilter] = useState('all')
+    const [filter, setFilter] = useState<typeof FILTERS[number]>(defaultFilter)
     const t = TEXT[lang]
 
     const fetchComments = useCallback(async () => {
@@ -66,6 +71,10 @@ export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, { 
       fetchComments()
     }, [fetchComments])
 
+    useEffect(() => {
+      setFilter(defaultFilter)
+    }, [defaultFilter])
+
     const filteredComments = filter === 'all' ? comments : comments.filter((c) => c.status === filter)
 
     if (isLoading) {
@@ -73,9 +82,9 @@ export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, { 
     }
 
     return (
-      <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 筛选控件 */}
-        <div className="flex gap-2 mb-2">
+        <div className="col-span-full flex gap-2 mb-2">
           {FILTERS.map((f) => (
             <button
               key={f}
@@ -93,7 +102,7 @@ export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, { 
         {filteredComments.map((comment) => (
           <div
             key={comment.id}
-            className="bg-white rounded-xl shadow-md border border-gray-100 px-5 py-4 flex flex-col gap-2 hover:shadow-lg transition"
+            className="bg-white rounded-2xl shadow-lg px-7 py-6 flex flex-col gap-3 hover:shadow-2xl transition-all min-h-[180px]"
           >
             <div className="flex items-center gap-2 mb-1">
               {/* 状态标签 */}
@@ -121,7 +130,7 @@ export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, { 
           </div>
         ))}
         {filteredComments.length === 0 && (
-          <div className="text-center text-gray-400 py-8">
+          <div className="col-span-full text-center text-gray-400 py-8">
             {t.noComment}
           </div>
         )}

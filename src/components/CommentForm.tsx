@@ -61,21 +61,18 @@ export function CommentForm({ onCommentSubmitted, lang = 'zh' }: CommentFormProp
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white/80 rounded-xl shadow p-6 flex flex-col gap-4 border border-gray-100">
-      <label htmlFor="comment" className="block text-base font-semibold text-gray-700 mb-1">
-        {t.label}
-      </label>
+    <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4 items-center bg-white/80 rounded-xl shadow p-6">
       <textarea
         id="comment"
         rows={4}
-        className="resize-none block w-full rounded-lg border border-gray-200 shadow-sm focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition p-3 text-gray-800 bg-gray-50 placeholder-gray-400"
+        className="w-full md:w-[90%] md:max-w-2xl mx-auto rounded-2xl p-5 text-lg bg-white shadow-md border-0 focus:ring-2 focus:ring-indigo-100 transition text-gray-800 placeholder-gray-400 resize-none"
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder={t.placeholder}
         required
         maxLength={500}
       />
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 w-full md:w-[90%] md:max-w-2xl mx-auto">
         <button
           type="submit"
           disabled={isSubmitting || !content.trim()}

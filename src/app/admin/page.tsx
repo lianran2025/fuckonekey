@@ -205,7 +205,7 @@ export default function AdminPage() {
           {comments.map((comment) => (
             <div
               key={comment.id}
-              className="bg-white rounded-xl shadow-md border border-gray-100 px-5 py-4 flex flex-col gap-3 hover:shadow-lg transition"
+              className="bg-white rounded-xl shadow-md px-5 py-4 flex flex-col gap-3 hover:shadow-lg transition"
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className={`px-2 py-0.5 text-xs rounded-full font-medium border ${STATUS_COLORS[comment.status] || STATUS_COLORS['pending']}`}>
