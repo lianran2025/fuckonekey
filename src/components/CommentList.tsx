@@ -17,6 +17,7 @@ interface Comment {
 interface CommentListProps {
   lang?: 'zh' | 'en'
   defaultFilter?: 'all' | 'approved' | 'rejected' | 'pending'
+  onCollapse?: () => void
 }
 
 const TEXT = {
@@ -65,28 +66,28 @@ function formatTime(dateStr: string, lang: 'zh' | 'en') {
 
 function CommentCard({ comment, lang, t }: { comment: Comment; lang: 'zh' | 'en'; t: any }) {
   return (
-    <div className="bg-white rounded-2xl shadow-lg px-7 py-6 flex flex-col gap-3 hover:shadow-2xl transition-all min-h-[180px]">
+    <div className="group bg-white border border-gray-200 rounded-2xl shadow-sm px-5 py-6 flex flex-col gap-4 min-h-[200px] transition-all duration-200 hover:shadow-2xl hover:border-yellow-300 hover:-translate-y-2 hover:bg-gray-50">
       <div className="flex items-center gap-3 mb-2">
-        <img src={comment.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover bg-gray-100 border" />
+        <img src={comment.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover bg-gray-200 border border-gray-300" />
         <div className="flex flex-col">
-          <span className="font-semibold text-gray-900 text-base">{comment.nickname || 'Anonymous'}</span>
-          <span className="text-xs text-gray-400">{formatTime(comment.createdAt, lang)}</span>
+          <span className="font-semibold text-gray-900 text-base group-hover:text-yellow-600 transition">{comment.nickname || 'Anonymous'}</span>
+          <span className="text-xs text-gray-400">用户</span>
         </div>
-        <span className={`ml-auto px-2 py-0.5 text-xs rounded-full font-medium border ${STATUS_COLORS[comment.status] || STATUS_COLORS['pending']}`}>{t.status[comment.status as keyof typeof t.status] || '未知'}</span>
       </div>
-      <p className="text-gray-800 text-base leading-relaxed break-words whitespace-pre-line">{comment.content}</p>
+      <div className="text-gray-800 text-base text-left leading-relaxed break-words whitespace-pre-line w-full">{comment.content}</div>
       {comment.reply && (
-        <div className="mt-3 rounded-lg bg-indigo-50 border-l-4 border-indigo-400 px-4 py-2">
-          <div className="text-xs text-indigo-500 font-semibold mb-1">{t.reply}</div>
-          <div className="text-indigo-900 text-sm whitespace-pre-line">{comment.reply}</div>
+        <div className="mt-3 rounded-lg bg-orange-50 border-l-4 border-orange-400 px-4 py-2 w-full">
+          <div className="text-xs text-orange-600 font-semibold mb-1">{t.reply}</div>
+          <div className="text-orange-900 text-sm whitespace-pre-line">{comment.reply}</div>
         </div>
       )}
+      <div className="mt-4 text-3xl text-orange-400 w-full flex justify-end pr-2 group-hover:scale-110 group-hover:text-yellow-400 transition">“”</div>
     </div>
   )
 }
 
 export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, CommentListProps>(
-  ({ lang = 'zh', defaultFilter = 'pending' }, ref) => {
+  ({ lang = 'zh', defaultFilter = 'pending', onCollapse }, ref) => {
     const [comments, setComments] = useState<Comment[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [filter, setFilter] = useState<typeof FILTERS[number]>(defaultFilter)
@@ -127,15 +128,26 @@ export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, Co
 
     return (
       <>
+        {/* 收起评论按钮放在顶部 */}
+        {onCollapse && (
+          <div className="flex justify-end mb-4">
+            <button
+              className="px-4 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-yellow-300 text-sm font-bold shadow"
+              onClick={onCollapse}
+            >
+              隐藏评论
+            </button>
+          </div>
+        )}
         {/* 筛选控件 */}
-        <div className="flex gap-2 mb-2">
+        <div className="flex gap-2 mb-4">
           {FILTERS.map((f) => (
             <button
               key={f}
-              className={`px-3 py-1 rounded-full border text-sm font-medium transition
+              className={`px-3 py-1 rounded-full text-sm font-medium transition
                 ${filter === f
-                  ? 'bg-indigo-600 text-white border-indigo-600 shadow'
-                  : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'}
+                  ? 'bg-yellow-300 text-gray-900 shadow'
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}
               `}
               onClick={() => setFilter(f)}
             >
@@ -146,14 +158,30 @@ export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, Co
         <Masonry
           breakpointCols={breakpointColumnsObj}
           className="flex w-auto gap-8"
-          columnClassName="masonry-column flex flex-col gap-8"
+          columnClassName="masonry-column flex flex-col gap-10"
         >
           {filteredComments.map((comment) => (
-            <CommentCard key={comment.id} comment={comment} lang={lang} t={t} />
+            <div className="group bg-white border border-gray-200 rounded-2xl shadow-sm px-5 py-6 flex flex-col gap-4 min-h-[200px] transition-all duration-200 hover:shadow-2xl hover:border-yellow-300 hover:-translate-y-2 hover:bg-gray-50">
+              <div className="flex items-center gap-3 mb-2">
+                <img src={comment.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover bg-gray-200 border border-gray-300" />
+                <div className="flex flex-col">
+                  <span className="font-semibold text-gray-900 text-base group-hover:text-yellow-600 transition">{comment.nickname || 'Anonymous'}</span>
+                  <span className="text-xs text-gray-400">用户</span>
+                </div>
+              </div>
+              <div className="text-gray-800 text-base text-left leading-relaxed break-words whitespace-pre-line w-full">{comment.content}</div>
+              {comment.reply && (
+                <div className="mt-3 rounded-lg bg-orange-50 border-l-4 border-orange-400 px-4 py-2 w-full">
+                  <div className="text-xs text-orange-600 font-semibold mb-1">{t.reply}</div>
+                  <div className="text-orange-900 text-sm whitespace-pre-line">{comment.reply}</div>
+                </div>
+              )}
+              <div className="mt-4 text-3xl text-orange-400 w-full flex justify-end pr-2 group-hover:scale-110 group-hover:text-yellow-400 transition">“”</div>
+            </div>
           ))}
         </Masonry>
         {filteredComments.length === 0 && (
-          <div className="text-center text-gray-400 py-8">
+          <div className="text-center text-gray-500 py-8">
             {t.noComment}
           </div>
         )}

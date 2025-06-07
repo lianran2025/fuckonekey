@@ -5,6 +5,10 @@ import { useState } from 'react'
 interface CommentFormProps {
   onCommentSubmitted?: () => void
   lang?: 'zh' | 'en'
+  title?: string
+  subtitle?: string
+  onLangSwitch?: () => void
+  onShowComments?: () => void
 }
 
 const TEXT = {
@@ -24,7 +28,7 @@ const TEXT = {
   },
 }
 
-export function CommentForm({ onCommentSubmitted, lang = 'zh' }: CommentFormProps) {
+export function CommentForm({ onCommentSubmitted, lang = 'zh', title, subtitle, onLangSwitch, onShowComments }: CommentFormProps) {
   const [content, setContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -61,27 +65,33 @@ export function CommentForm({ onCommentSubmitted, lang = 'zh' }: CommentFormProp
   }
 
   return (
-    <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4 items-center bg-white/80 rounded-xl shadow p-6">
-      <textarea
-        id="comment"
-        rows={4}
-        className="w-full md:w-[90%] md:max-w-2xl mx-auto rounded-2xl p-5 text-lg bg-white shadow-md border-0 focus:ring-2 focus:ring-indigo-100 transition text-gray-800 placeholder-gray-400 resize-none"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder={t.placeholder}
-        required
-        maxLength={500}
-      />
-      <div className="flex items-center gap-3 w-full md:w-[90%] md:max-w-2xl mx-auto">
-        <button
-          type="submit"
-          disabled={isSubmitting || !content.trim()}
-          className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-indigo-500 to-blue-500 px-6 py-2 text-base font-semibold text-white shadow-md hover:from-indigo-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:ring-offset-2 transition disabled:opacity-60"
-        >
-          {isSubmitting ? t.submitting : t.submit}
-        </button>
-        {success && <span className="text-green-500 text-sm">{t.success}</span>}
+    <form onSubmit={handleSubmit} className="w-full flex justify-center">
+      <div className="w-full max-w-3xl bg-gray-900 rounded-2xl shadow-2xl px-6 py-6">
+        <div className="flex items-center">
+          {/* OneKey图标 */}
+          <img src="https://tuchuang6662025.oss-cn-hangzhou.aliyuncs.com/onekey_icon_mono_white.png" alt="OneKey" className="w-8 h-8 mr-3" />
+          {/* 输入框 */}
+          <input
+            type="text"
+            className="flex-1 bg-transparent outline-none text-white text-xl placeholder-gray-400 opacity-60 border-0 placeholder:text-base"
+            placeholder={t.placeholder}
+            value={content}
+            onChange={e => setContent(e.target.value)}
+            maxLength={500}
+            required
+            onKeyDown={e => { if (e.key === 'Enter') handleSubmit(e); }}
+          />
+          {/* Send按钮 */}
+          <button
+            type="submit"
+            disabled={isSubmitting || !content.trim()}
+            className="ml-2 px-6 py-2 rounded-full bg-yellow-300 text-gray-900 font-bold text-lg shadow-lg transition hover:bg-yellow-400 disabled:opacity-60"
+          >
+            {isSubmitting ? t.submitting : (lang === 'zh' ? '提交' : 'Send')}
+          </button>
+        </div>
       </div>
+      {success && <span className="text-green-400 text-base ml-4 self-center">{t.success}</span>}
     </form>
   )
 } 
