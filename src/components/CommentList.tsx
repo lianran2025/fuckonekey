@@ -66,22 +66,20 @@ function formatTime(dateStr: string, lang: 'zh' | 'en') {
 
 function CommentCard({ comment, lang, t }: { comment: Comment; lang: 'zh' | 'en'; t: any }) {
   return (
-    <div className="group bg-gray-900 border border-gray-700 rounded-2xl shadow-lg px-5 py-6 flex flex-col gap-4 min-h-[200px] transition-all duration-200 hover:shadow-2xl hover:border-yellow-300 hover:-translate-y-2 hover:bg-gray-800 text-gray-100">
+    <div className="group bg-gray-900 border border-gray-700 rounded-2xl shadow-lg px-5 py-6 flex flex-col gap-4 h-60 transition-all duration-200 hover:shadow-2xl hover:border-yellow-300 hover:-translate-y-2 hover:bg-gray-800 text-gray-100">
       <div className="flex items-center gap-3 mb-2">
         <img src={comment.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover bg-gray-200 border border-gray-300" />
         <div className="flex flex-col">
-          <span className="font-semibold text-gray-900 text-base group-hover:text-yellow-600 transition">{comment.nickname || 'Anonymous'}</span>
-          <span className="text-xs text-gray-400">用户</span>
+          <span className="font-semibold text-gray-100 group-hover:text-yellow-300 transition">{comment.nickname || 'Anonymous'}</span>
         </div>
       </div>
-      <div className="text-gray-100 text-base text-left leading-relaxed break-words whitespace-pre-line w-full">{comment.content}</div>
+      <div className="text-gray-100 text-base text-left leading-relaxed break-words whitespace-pre-line w-full overflow-y-auto max-h-full scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">{comment.content}</div>
       {comment.reply && (
         <div className="mt-3 rounded-lg bg-orange-50 border-l-4 border-orange-400 px-4 py-2 w-full">
           <div className="text-xs text-orange-600 font-semibold mb-1">{t.reply}</div>
           <div className="text-orange-900 text-sm whitespace-pre-line">{comment.reply}</div>
         </div>
       )}
-      <div className="mt-4 text-3xl text-orange-400 w-full flex justify-end pr-2 group-hover:scale-110 group-hover:text-yellow-400 transition">“”</div>
     </div>
   )
 }
@@ -178,22 +176,20 @@ export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, Co
               columnClassName="masonry-column flex flex-col gap-10"
             >
               {filteredComments.map((comment) => (
-                <div className="group bg-gray-900 border border-gray-700 rounded-2xl shadow-lg px-5 py-6 flex flex-col gap-4 min-h-[200px] transition-all duration-200 hover:shadow-2xl hover:border-yellow-300 hover:-translate-y-2 hover:bg-gray-800 text-gray-100">
+                <div className="group bg-gray-900 border border-gray-700 rounded-2xl shadow-lg px-5 py-6 flex flex-col gap-4 h-60 transition-all duration-200 hover:shadow-2xl hover:border-yellow-300 hover:-translate-y-2 hover:bg-gray-800 text-gray-100">
                   <div className="flex items-center gap-3 mb-2">
                     <img src={comment.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover bg-gray-200 border border-gray-300" />
                     <div className="flex flex-col">
-                      <span className="font-semibold text-gray-900 text-base group-hover:text-yellow-600 transition">{comment.nickname || 'Anonymous'}</span>
-                      <span className="text-xs text-gray-400">用户</span>
+                      <span className="font-semibold text-gray-100 group-hover:text-yellow-300 transition">{comment.nickname || 'Anonymous'}</span>
                     </div>
                   </div>
-                  <div className="text-gray-100 text-base text-left leading-relaxed break-words whitespace-pre-line w-full">{comment.content}</div>
+                  <div className="text-gray-100 text-base text-left leading-relaxed break-words whitespace-pre-line w-full overflow-y-auto max-h-full scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">{comment.content}</div>
                   {comment.reply && (
                     <div className="mt-3 rounded-lg bg-orange-50 border-l-4 border-orange-400 px-4 py-2 w-full">
                       <div className="text-xs text-orange-600 font-semibold mb-1">{t.reply}</div>
                       <div className="text-orange-900 text-sm whitespace-pre-line">{comment.reply}</div>
                     </div>
                   )}
-                  <div className="mt-4 text-3xl text-orange-400 w-full flex justify-end pr-2 group-hover:scale-110 group-hover:text-yellow-400 transition">“”</div>
                 </div>
               ))}
             </Masonry>
