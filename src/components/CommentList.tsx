@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, forwardRef, useImperativeHandle } from 'react'
+import { useEffect, useState, useCallback, forwardRef, useImperativeHandle, useRef } from 'react'
 import Masonry from 'react-masonry-css'
 
 interface Comment {
@@ -66,7 +66,7 @@ function formatTime(dateStr: string, lang: 'zh' | 'en') {
 
 function CommentCard({ comment, lang, t }: { comment: Comment; lang: 'zh' | 'en'; t: any }) {
   return (
-    <div className="group bg-white border border-gray-200 rounded-2xl shadow-sm px-5 py-6 flex flex-col gap-4 min-h-[200px] transition-all duration-200 hover:shadow-2xl hover:border-yellow-300 hover:-translate-y-2 hover:bg-gray-50">
+    <div className="group bg-gray-900 border border-gray-700 rounded-2xl shadow-lg px-5 py-6 flex flex-col gap-4 min-h-[200px] transition-all duration-200 hover:shadow-2xl hover:border-yellow-300 hover:-translate-y-2 hover:bg-gray-800 text-gray-100">
       <div className="flex items-center gap-3 mb-2">
         <img src={comment.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover bg-gray-200 border border-gray-300" />
         <div className="flex flex-col">
@@ -74,7 +74,7 @@ function CommentCard({ comment, lang, t }: { comment: Comment; lang: 'zh' | 'en'
           <span className="text-xs text-gray-400">用户</span>
         </div>
       </div>
-      <div className="text-gray-800 text-base text-left leading-relaxed break-words whitespace-pre-line w-full">{comment.content}</div>
+      <div className="text-gray-100 text-base text-left leading-relaxed break-words whitespace-pre-line w-full">{comment.content}</div>
       {comment.reply && (
         <div className="mt-3 rounded-lg bg-orange-50 border-l-4 border-orange-400 px-4 py-2 w-full">
           <div className="text-xs text-orange-600 font-semibold mb-1">{t.reply}</div>
@@ -92,6 +92,8 @@ export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, Co
     const [isLoading, setIsLoading] = useState(true)
     const [filter, setFilter] = useState<typeof FILTERS[number]>(defaultFilter)
     const t = TEXT[lang]
+    const [containerHeight, setContainerHeight] = useState<string | number>('auto')
+    const contentRef = useRef<HTMLDivElement>(null)
 
     const fetchComments = useCallback(async () => {
       try {
@@ -120,6 +122,16 @@ export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, Co
       setFilter(defaultFilter)
     }, [defaultFilter])
 
+    useEffect(() => {
+      if (contentRef.current) {
+        const height = contentRef.current.offsetHeight
+        setContainerHeight(height)
+        // 动画结束后设为auto，保证响应式
+        const timer = setTimeout(() => setContainerHeight('auto'), 500)
+        return () => clearTimeout(timer)
+      }
+    }, [filter, comments.length])
+
     const filteredComments = filter === 'all' ? comments : comments.filter((c) => c.status === filter)
 
     if (isLoading) {
@@ -128,63 +140,70 @@ export const CommentList = forwardRef<{ fetchComments: () => Promise<void> }, Co
 
     return (
       <>
-        {/* 收起评论按钮放在顶部 */}
-        {onCollapse && (
-          <div className="flex justify-end mb-4">
-            <button
-              className="px-4 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-yellow-300 text-sm font-bold shadow"
-              onClick={onCollapse}
-            >
-              隐藏评论
-            </button>
+        {/* 顶部操作区：筛选按钮+收起评论按钮同一行 */}
+        <div className="flex items-center mb-4 gap-4 flex-wrap">
+          <div className="flex gap-2 flex-wrap">
+            {FILTERS.map((f) => (
+              <button
+                key={f}
+                className={`px-3 py-1 rounded-full text-sm font-medium transition
+                  ${filter === f
+                    ? 'bg-yellow-300 text-gray-900 shadow'
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}
+                `}
+                onClick={() => setFilter(f)}
+              >
+                {t.filters[f as keyof typeof t.filters]}
+              </button>
+            ))}
+            {onCollapse && (
+              <button
+                className="px-4 py-1 rounded-full bg-gray-800 hover:bg-gray-700 text-yellow-300 text-sm font-bold shadow ml-2"
+                onClick={onCollapse}
+              >
+                {lang === 'zh' ? '收起评论' : 'Hide comments'}
+              </button>
+            )}
           </div>
-        )}
-        {/* 筛选控件 */}
-        <div className="flex gap-2 mb-4">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              className={`px-3 py-1 rounded-full text-sm font-medium transition
-                ${filter === f
-                  ? 'bg-yellow-300 text-gray-900 shadow'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}
-              `}
-              onClick={() => setFilter(f)}
-            >
-              {t.filters[f as keyof typeof t.filters]}
-            </button>
-          ))}
+          {/* 这里可预留查看全部评论按钮分组，gap-4分隔 */}
         </div>
-        <Masonry
-          breakpointCols={breakpointColumnsObj}
-          className="flex w-auto gap-8"
-          columnClassName="masonry-column flex flex-col gap-10"
+        <div
+          style={{ height: containerHeight, transition: 'height 0.5s' }}
+          className="relative w-full"
         >
-          {filteredComments.map((comment) => (
-            <div className="group bg-white border border-gray-200 rounded-2xl shadow-sm px-5 py-6 flex flex-col gap-4 min-h-[200px] transition-all duration-200 hover:shadow-2xl hover:border-yellow-300 hover:-translate-y-2 hover:bg-gray-50">
-              <div className="flex items-center gap-3 mb-2">
-                <img src={comment.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover bg-gray-200 border border-gray-300" />
-                <div className="flex flex-col">
-                  <span className="font-semibold text-gray-900 text-base group-hover:text-yellow-600 transition">{comment.nickname || 'Anonymous'}</span>
-                  <span className="text-xs text-gray-400">用户</span>
+          <div ref={contentRef}>
+            <Masonry
+              breakpointCols={breakpointColumnsObj}
+              className="flex w-auto gap-8"
+              columnClassName="masonry-column flex flex-col gap-10"
+            >
+              {filteredComments.map((comment) => (
+                <div className="group bg-gray-900 border border-gray-700 rounded-2xl shadow-lg px-5 py-6 flex flex-col gap-4 min-h-[200px] transition-all duration-200 hover:shadow-2xl hover:border-yellow-300 hover:-translate-y-2 hover:bg-gray-800 text-gray-100">
+                  <div className="flex items-center gap-3 mb-2">
+                    <img src={comment.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover bg-gray-200 border border-gray-300" />
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-gray-900 text-base group-hover:text-yellow-600 transition">{comment.nickname || 'Anonymous'}</span>
+                      <span className="text-xs text-gray-400">用户</span>
+                    </div>
+                  </div>
+                  <div className="text-gray-100 text-base text-left leading-relaxed break-words whitespace-pre-line w-full">{comment.content}</div>
+                  {comment.reply && (
+                    <div className="mt-3 rounded-lg bg-orange-50 border-l-4 border-orange-400 px-4 py-2 w-full">
+                      <div className="text-xs text-orange-600 font-semibold mb-1">{t.reply}</div>
+                      <div className="text-orange-900 text-sm whitespace-pre-line">{comment.reply}</div>
+                    </div>
+                  )}
+                  <div className="mt-4 text-3xl text-orange-400 w-full flex justify-end pr-2 group-hover:scale-110 group-hover:text-yellow-400 transition">“”</div>
                 </div>
+              ))}
+            </Masonry>
+            {filteredComments.length === 0 && (
+              <div className="text-center text-gray-500 py-8">
+                {t.noComment}
               </div>
-              <div className="text-gray-800 text-base text-left leading-relaxed break-words whitespace-pre-line w-full">{comment.content}</div>
-              {comment.reply && (
-                <div className="mt-3 rounded-lg bg-orange-50 border-l-4 border-orange-400 px-4 py-2 w-full">
-                  <div className="text-xs text-orange-600 font-semibold mb-1">{t.reply}</div>
-                  <div className="text-orange-900 text-sm whitespace-pre-line">{comment.reply}</div>
-                </div>
-              )}
-              <div className="mt-4 text-3xl text-orange-400 w-full flex justify-end pr-2 group-hover:scale-110 group-hover:text-yellow-400 transition">“”</div>
-            </div>
-          ))}
-        </Masonry>
-        {filteredComments.length === 0 && (
-          <div className="text-center text-gray-500 py-8">
-            {t.noComment}
+            )}
           </div>
-        )}
+        </div>
       </>
     )
   }
