@@ -66,14 +66,14 @@ export function CommentForm({ onCommentSubmitted, lang = 'zh', title, subtitle, 
 
   return (
     <form onSubmit={handleSubmit} className="w-full flex justify-center">
-      <div className="w-full max-w-3xl bg-gray-900 rounded-2xl shadow-2xl px-6 py-6">
-        <div className="flex items-center">
+      <div className="w-full max-w-3xl bg-gray-900 rounded-xl md:rounded-2xl shadow-2xl md:px-6 px-3 md:py-6 py-3">
+        <div className="flex items-center flex-nowrap">
           {/* OneKey图标 */}
-          <img src="https://tuchuang6662025.oss-cn-hangzhou.aliyuncs.com/onekey_icon_mono_white.png" alt="OneKey" className="w-8 h-8 mr-3" />
+          <img src="https://tuchuang6662025.oss-cn-hangzhou.aliyuncs.com/onekey_icon_mono_white.png" alt="OneKey" className="w-8 h-8 mr-2" />
           {/* 输入框 */}
           <input
             type="text"
-            className="flex-1 bg-transparent outline-none text-white text-xl placeholder-gray-400 opacity-60 border-0 placeholder:text-base"
+            className="flex-1 min-w-0 bg-transparent outline-none text-white text-xl placeholder-gray-400 opacity-60 border-0 placeholder:text-base"
             placeholder={t.placeholder}
             value={content}
             onChange={e => setContent(e.target.value)}
@@ -85,9 +85,27 @@ export function CommentForm({ onCommentSubmitted, lang = 'zh', title, subtitle, 
           <button
             type="submit"
             disabled={isSubmitting || !content.trim()}
-            className="ml-2 px-6 py-2 rounded-full bg-yellow-300 text-gray-900 font-bold text-lg shadow-lg transition hover:bg-yellow-400 disabled:opacity-60"
+            className="ml-2 w-16 md:w-20 h-12 rounded-full bg-yellow-300 text-gray-900 font-bold text-lg shadow-lg transition hover:bg-yellow-400 disabled:opacity-60 flex-shrink-0"
           >
             {isSubmitting ? t.submitting : (lang === 'zh' ? '提交' : 'Send')}
+          </button>
+        </div>
+        <div className="flex gap-4 justify-center md:justify-end mt-3">
+          {/* 语言切换按钮 */}
+          <button
+            type="button"
+            onClick={onLangSwitch}
+            className="px-4 py-2 rounded-full bg-gray-700 text-gray-400 font-bold text-lg shadow-lg transition hover:bg-gray-600 disabled:opacity-60"
+          >
+            {lang === 'zh' ? 'English' : '中文'}
+          </button>
+          {/* 显示评论按钮 */}
+          <button
+            type="button"
+            onClick={onShowComments}
+            className="px-4 py-2 rounded-full bg-gray-700 text-gray-400 font-bold text-lg shadow-lg transition hover:bg-gray-600 disabled:opacity-60"
+          >
+            显示评论
           </button>
         </div>
       </div>
