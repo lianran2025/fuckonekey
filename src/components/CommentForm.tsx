@@ -120,7 +120,6 @@ export function CommentForm({ onCommentSubmitted, lang = 'zh', title, subtitle, 
           </div>
         </div>
       </div>
-      {success && <span className="text-green-400 text-base ml-4 self-center">{t.success}</span>}
     </form>
   )
 } 

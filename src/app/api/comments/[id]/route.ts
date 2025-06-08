@@ -15,8 +15,9 @@ export async function DELETE(request: NextRequest, context: any) {
     return NextResponse.json({ error: '未授权' }, { status: 401 })
   }
   try {
+    const params = await context.params;
     await prisma.oneKeyFeedback.update({
-      where: { id: context.params.id },
+      where: { id: params.id },
       data: { isDeleted: true },
     })
     return NextResponse.json({ success: true })
@@ -34,12 +35,13 @@ export async function PATCH(request: NextRequest, context: any) {
     return NextResponse.json({ error: '未授权' }, { status: 401 })
   }
   try {
+    const params = await context.params;
     const { status, reply } = await request.json()
     const data: any = {}
     if (status !== undefined) data.status = status
     if (reply !== undefined) data.reply = reply
     const comment = await prisma.oneKeyFeedback.update({
-      where: { id: context.params.id },
+      where: { id: params.id },
       data,
     })
     return NextResponse.json(comment)
